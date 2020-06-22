@@ -1,0 +1,5 @@
+# variables for MySQL
+MS_ROOT_PASSWORD=master
+MS_USER=user
+MS_PASSWORD=resu
+MS_DATABASE=base

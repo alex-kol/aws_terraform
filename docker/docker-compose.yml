@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+  php:
+    build:
+      context: ./php
+    volumes:
+      - ./www_html:/var/www/html
+    restart: unless-stopped
+    environment:
+      MYSQL_USER: ${MS_USER}
+      MYSQL_PASSWORD: ${MS_PASSWORD}
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./www_html:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./logs/nginx:/var/log/nginx
+    restart: unless-stopped
+    depends_on:
+      - php
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    volumes:
+      - ./logs/mysql:/var/log/mysql
+      - ./mysql/logs.cnf:/etc/mysql/mysql.conf.d/logs.cnf
+      - ./mysql:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    depends_on:
+      - php
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MS_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MS_DATABASE}
+      MYSQL_USER: ${MS_USER}
+      MYSQL_PASSWORD: ${MS_PASSWORD}
+#    entrypoint: ""
+    command: bash -c "chown -R mysql:mysql /var/log/mysql && exec /entrypoint.sh mysqld"
